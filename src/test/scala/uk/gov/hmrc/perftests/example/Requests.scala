@@ -24,11 +24,12 @@ import uk.gov.hmrc.performance.conf.ServicesConfiguration
 
 object Requests extends ServicesConfiguration {
 
-  val baseUrl: String = baseUrlFor("crs-fatca-fi-management-frontend")
+  val baseUrlFi: String = baseUrlFor("crs-fatca-fi-management-frontend")
   val baseUrlManualSub: String = baseUrlFor("crs-fatca-manual-submission-frontend")
   val baseUrlAuth: String = baseUrlFor("auth-frontend")
-  val route: String = "/manage-your-crs-and-fatca-financial-institutions"
+  val FiRoute: String = "/manage-your-crs-and-fatca-financial-institutions"
   val authRoute: String = "/auth-login-stub/gg-sign-in"
+  val manualSubRoute: String = "/crs-fatca-manual-submission-frontend"
   val amazonUrlPattern = """action="(.*?)""""
   val staticId = "683373339"
 
@@ -43,7 +44,7 @@ object Requests extends ServicesConfiguration {
     http("Enter Auth login credentials")
       .post(baseUrlAuth + authRoute)
       .formParam("authorityId", "")
-      .formParam("redirectionUrl", baseUrl + route)
+      .formParam("redirectionUrl", baseUrlFi + FiRoute)
       .formParam("credentialStrength", "strong")
       .formParam("confidenceLevel", "50")
       .formParam("affinityGroup", "Organisation")
@@ -56,7 +57,7 @@ object Requests extends ServicesConfiguration {
       .formParam("enrolment[4].taxIdentifier[0].value", "333")
       .formParam("enrolment[4].state", "Activated")
       .check(status.is(303))
-      .check(header("Location").is(baseUrl + route).saveAs("LandingPage"))
+      .check(header("Location").is(baseUrlFi + FiRoute).saveAs("LandingPage"))
 
   val getCRSFATCADashboardPage: HttpRequestBuilder =
     http("Get CRS FATCA Dashboard Page")
@@ -75,7 +76,9 @@ object Requests extends ServicesConfiguration {
 
   val getSubmittedReportsForFiRedirect:HttpRequestBuilder =
     http("Get Manage Report For Fi Page")
-      .get(baseUrlManualSub + "/read-submission-data")
+      .get(baseUrlManualSub + manualSubRoute + "/read-submission-data")
+      .queryParam("fiId", staticId)
+      .queryParam("fiName", "Fifth FI")
       .check(status.is(303))
       .check(header("Location").saveAs("manageReportsForFi"))
 
