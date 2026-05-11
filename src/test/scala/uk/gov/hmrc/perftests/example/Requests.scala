@@ -32,6 +32,7 @@ object Requests extends ServicesConfiguration {
   val manualSubRoute: String = "/crs-fatca-manual-submission-frontend"
   val amazonUrlPattern = """action="(.*?)""""
   val staticId = "683373339"
+  val messageRefId = "GB2025GB-XZU9323406858-APIMB0666"
 
   def inputSelectorByName(name: String): Expression[String] = s"input[name='$name']"
 
@@ -76,11 +77,46 @@ object Requests extends ServicesConfiguration {
 
   val getSubmittedReportsForFiRedirect:HttpRequestBuilder =
     http("Get Manage Report For Fi Page")
-      .get(baseUrlManualSub + manualSubRoute + "/read-submission-data")
+      .get(s"$baseUrlManualSub$manualSubRoute/read-submission-data")
       .queryParam("fiId", staticId)
       .queryParam("fiName", "Fifth FI")
       .check(status.is(303))
-      .check(header("Location").saveAs("manageReportsForFi"))
+      .check(header("Location").saveAs("readSubmissionForFi"))
+
+  val getSubmittedReportForFiPage:HttpRequestBuilder =
+    http("Get Submitted Reports For Fi Page")
+      .get(s"$baseUrlManualSub$manualSubRoute/manage-reports-for-2025")
+      .queryParam("fiId", staticId)
+      .queryParam("fiName", "Fifth FI")
+      .check(status.is(200))
+
+  val getVoidingFatcaInformationPage: HttpRequestBuilder =
+    http("Get Voiding FATCA Information Page")
+      .get(s"$baseUrlManualSub$manualSubRoute/fatca-void/voiding-fatca-information")
+      .queryParam("originalMessageRefId", messageRefId)
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val postVoidingFatcaInformationPage: HttpRequestBuilder =
+    http("Post Voiding FATCA Information Page")
+      .post(s"$baseUrlManualSub$manualSubRoute/fatca-void/voiding-fatca-information")
+      .queryParam("originalMessageRefId", messageRefId)
+      .formParam("csrfToken", "#{csrfToken}")
+      .formParam("value", "true")
+      .check(status.is(303))
+      .check(header("Location").saveAs("informationVoided"))
+
+  val getInformationVoidedPage: HttpRequestBuilder =
+    http("Get Fatca Information Voided Page")
+      .get(s"$baseUrlManualSub$manualSubRoute/fatca-void/information-voided")
+      .queryParam("originalMessageRefId", messageRefId)
+      .check(status.is(200))
+
+
+
+
+
+
 
 
 
