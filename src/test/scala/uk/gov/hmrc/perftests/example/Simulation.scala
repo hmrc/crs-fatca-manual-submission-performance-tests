@@ -30,7 +30,11 @@ class Simulation extends PerformanceTestRunner {
   setup("ManageYourReports", "Manage Your Reports").withActions(
     getManageYourFiPage,
     getManualSubmissionRefresh,
-    getSubmittedReportsForFiRedirect
+    getSubmittedReportsForFiRedirect,
+    getSubmittedReportForFiPage,
+    getVoidingFatcaInformationPage,
+    postVoidingFatcaInformationPage,
+    getInformationVoidedPage
 
 
 
