@@ -29,17 +29,44 @@ class Simulation extends PerformanceTestRunner {
 
   setup("ManageYourReports", "Manage Your Reports").withActions(
     getManageYourFiPage,
-    getManualSubmissionRefresh,
-    getSubmittedReportsForFiRedirect,
-    getSubmittedReportForFiPage,
-    getVoidingFatcaInformationPage,
-    postVoidingFatcaInformationPage,
-    getInformationVoidedPage
+    getSubmittedReportsForFi,
+    getVoidingFatcaInformation,
+    postVoidingFatcaInformation,
+    getInformationVoided
+  )
 
+  setup("ManageYourElections", "Manage Your Elections").withActions(
+    getManageYourFiPage,
+    getSubmittedReportsForFi,
+    getManageElectionsForFI
+  )
+
+  setup("ManageCrsElections", "Manage CRS Elections").withActions(
+    getCrsContracts,
+    postCrsContracts,
+    getCrsDormantAccounts,
+    postCrsDormantAccounts,
+    getCrsThresholds,
+    postCrsThresholds,
+    getCrsCarfGrossProceeds,
+    postCrsCarfGrossProceeds,
+    getCrsGrossProceeds,
+    postCrsGrossProceeds,
+    getCheckAnswers,
+    postCheckAnswers,
+    getElectionsSent
+  )
+
+  setup("ManageFatcaElections", "Manage FATCA Elections").withActions(
+    getFatcaUsTreasuryRegulations,
+    postFatcaUsTreasuryRegulations,
+    getFatcaThresholds,
+    postFatcaThresholds
 
 
 
   )
 
-  runSimulation()
+
+    runSimulation()
 }
