@@ -35,13 +35,13 @@ class Simulation extends PerformanceTestRunner {
     getInformationVoided
   )
 
-  setup("ManageYourElections", "Manage Your Elections").withActions(
+  setup("ManageYourElections", "Manage Your Elections").withRequests(
     getManageYourFiPage,
     getSubmittedReportsForFi,
     getManageElectionsForFI
   )
 
-  setup("ManageCrsElections", "Manage CRS Elections").withActions(
+  setup("ManageCrsElections", "CRS - Manage Election Journey").withActions(
     getCrsContracts,
     postCrsContracts,
     getCrsDormantAccounts,
@@ -52,19 +52,19 @@ class Simulation extends PerformanceTestRunner {
     postCrsCarfGrossProceeds,
     getCrsGrossProceeds,
     postCrsGrossProceeds,
-    getCheckAnswers,
+    //getCheckAnswers,
     postCheckAnswers,
     getElectionsSent
   )
 
-  setup("ManageFatcaElections", "Manage FATCA Elections").withActions(
+  setup("ManageFatcaElections", "FATCA - Manage Election Journey").withActions(
     getFatcaUsTreasuryRegulations,
     postFatcaUsTreasuryRegulations,
     getFatcaThresholds,
-    postFatcaThresholds
-
-
-
+    postFatcaThresholds,
+    //getFatcaCheckAnswers,
+    postFatcaCheckAnswers,
+    getElectionsSent
   )
 
 

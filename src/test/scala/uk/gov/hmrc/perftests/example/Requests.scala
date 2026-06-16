@@ -31,10 +31,11 @@ object Requests extends ServicesConfiguration {
   val authRoute: String = "/auth-login-stub/gg-sign-in"
   val manualSubRoute: String = "/crs-fatca-manual-submission-frontend"
   val amazonUrlPattern = """action="(.*?)""""
-  val staticId = "683373339"
+  val staticId = "TES683373339"
   val messageRefId = "GB2025GB-XZU9323406858-APIMB0666"
   val informationVoidedUrl = "/fatca-void/information-voided?originalMessageRefId=GB2025GB-XZU9323406858-APIMB0666"
   val year = "2026"
+
   val getAuthLoginPage: HttpRequestBuilder =
     http("Get Auth login page")
       .get(baseUrlAuth + authRoute)
@@ -49,7 +50,7 @@ object Requests extends ServicesConfiguration {
       .formParam("affinityGroup", "Organisation".el[String])
       .formParam("enrolment[0].name", "HMRC-FATCA-ORG".el[String])
       .formParam("enrolment[0].taxIdentifier[0].name", "FATCAID".el[String])
-      .formParam("enrolment[0].taxIdentifier[0].value", "XE2ATCA0009234567".el[String])
+      .formParam("enrolment[0].taxIdentifier[0].value", "2009234567".el[String])
       .formParam("enrolment[0].state", "Activated".el[String])
       .formParam("enrolment[4].name", "IR-CT".el[String])
       .formParam("enrolment[4].taxIdentifier[0].name", "UTR".el[String])
@@ -170,25 +171,28 @@ object Requests extends ServicesConfiguration {
       .post(baseUrlManualSub + "#{crsGrossProceeds}")
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "true".el[String])
+      .disableFollowRedirect
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/check-answers?year=2026").saveAs("checkAnswers"))
+      .check(header("Location".el[String]).is(manualSubRoute + "/elections/check-answers?year=2026").saveAs("crsCheckAnswers"))
 
-  val getCheckAnswers: HttpRequestBuilder =
-    http("Get Check Answers Page")
-      .get(baseUrlManualSub + "#{checkAnswers}")
+  /*val getCheckAnswers: HttpRequestBuilder =
+    http("Get Crs Check Answers Page")
+      .get((baseUrlManualSub + "#{crsCheckAnswers}").el[String])
+      .disableFollowRedirect
       .check(status.is(200))
-      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))*/
 
   val postCheckAnswers: HttpRequestBuilder =
     http("Post Check Answers Page")
-      .post(baseUrlManualSub + "#{checkAnswers}")
+      .post((baseUrlManualSub + "#{crsCheckAnswers}").el[String])
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .check(status.is(303))
       .check(header("Location".el[String]).is(manualSubRoute + "/elections/elections-sent").saveAs("electionsSent"))
 
   val getElectionsSent: HttpRequestBuilder =
     http("Get Elections Sent Page")
-      .post(baseUrlManualSub + "#{electionsSent}")
+      .get((baseUrlManualSub + "#{electionsSent}").el[String])
+      .disableFollowRedirect
       .check(status.is(200))
 
 
@@ -222,6 +226,19 @@ object Requests extends ServicesConfiguration {
       .formParam("value", "true".el[String])
       .check(status.is(303))
       .check(header("Location".el[String]).is(manualSubRoute + "/elections/check-answers?year=2026").saveAs("fatcaCheckAnswers"))
+
+  /*val getFatcaCheckAnswers: HttpRequestBuilder =
+    http("Get Fatca Check Answers Page")
+      .get(baseUrlManualSub + "#{fatcaCheckAnswers}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))*/
+
+  val postFatcaCheckAnswers: HttpRequestBuilder =
+    http("Post Check Answers Page")
+      .post(baseUrlManualSub + "#{fatcaCheckAnswers}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/elections/elections-sent").saveAs("electionsSent"))
 
 
   def inputSelectorByName(name: String): String = s"input[name='$name']"
