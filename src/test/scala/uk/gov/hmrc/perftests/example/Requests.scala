@@ -75,6 +75,55 @@ object Requests extends ServicesConfiguration {
       .queryParam("fiId", staticId.el[String])
       .check(status.is(200))
 
+  val getReportDetailsRegimePage: HttpRequestBuilder =
+    http("Get Report Details for Crs or Fatca page")
+      .get(s"$baseUrlManualSub$manualSubRoute/manual/report-details/crs-or-fatca")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val postReportDetailsRegimePage: HttpRequestBuilder =
+    http("Post Report Details For Crs of Fatca page")
+      .post(s"$baseUrlManualSub$manualSubRoute/manual/report-details/crs-or-fatca")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("value", "crs".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/report-details/year").saveAs("reportDetailsYear"))
+
+  val getReportDetailsYearPage: HttpRequestBuilder =
+    http("Get Report Details Year Page")
+      .get(baseUrlManualSub + "#{reportDetailsYear}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val postReportDetailsYearPage: HttpRequestBuilder =
+    http("Post Report Details Year Page")
+      .post(baseUrlManualSub + "#{reportDetailsYear}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("value", "2025".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/report-details/type-of-report").saveAs("typeOfReport"))
+
+  val getTypeOfReportPage: HttpRequestBuilder =
+    http("Get Type of Report Page")
+      .get(baseUrlManualSub + "#{typeOfReport}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val postTypeOfReportPage: HttpRequestBuilder =
+    http("Post Type of Report Page")
+      .post(baseUrlManualSub + "#{typeOfReport}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("value", "information".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/report-details/check-answers" ).saveAs("checkAnswers"))
+
+  val getCheckAnswersPage: HttpRequestBuilder =
+    http("Get Check Answers Page")
+      .get(baseUrlManualSub + "#{checkAnswers}")
+      .check(status.is(200))
+
+
+
   val getVoidingFatcaInformation: HttpRequestBuilder =
     http("Get Voiding Fatac information Page")
       .get(s"$baseUrlManualSub$manualSubRoute/fatca-void/voiding-fatca-information")

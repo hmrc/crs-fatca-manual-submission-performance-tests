@@ -27,12 +27,24 @@ class Simulation extends PerformanceTestRunner {
     getCRSFATCADashboardPage
   )
 
-  setup("ManageYourReports", "Manage Your Reports").withActions(
+  setup("VoidFatcaInformation", "Manage Your Reports").withActions(
     getManageYourFiPage,
     getSubmittedReportsForFi,
     getVoidingFatcaInformation,
     postVoidingFatcaInformation,
     getInformationVoided
+  )
+
+  setup("ReportDetails", "Submit Report Details").withActions(
+    getManageYourFiPage,
+    getSubmittedReportsForFi,
+    getReportDetailsRegimePage,
+    postReportDetailsRegimePage,
+    getReportDetailsYearPage,
+    postReportDetailsYearPage,
+    getTypeOfReportPage,
+    postTypeOfReportPage,
+    getCheckAnswersPage
   )
 
   setup("ManageYourElections", "Manage Your Elections").withRequests(
