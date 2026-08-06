@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.perftests.example
+package uk.gov.hmrc.perftests
 
 import uk.gov.hmrc.performance.simulation.PerformanceTestRunner
-import uk.gov.hmrc.perftests.example.Requests._
+import uk.gov.hmrc.perftests.Requests._
 
 class Simulation extends PerformanceTestRunner {
 
@@ -44,7 +44,25 @@ class Simulation extends PerformanceTestRunner {
     postReportDetailsYearPage,
     getTypeOfReportPage,
     postTypeOfReportPage,
-    getCheckAnswersPage
+    getReportDetailsCheckAnswersPage,
+    postReportDetailsCheckAnswersPage,
+    getSendAReportPage
+  )
+
+  setup("SponsorDetails", "Add the Sponsor").withActions(
+    getHaveSponsorPage,
+    postHaveSponsorPage("true"),
+    getSponsorNamePage,
+    postSponsorNamePage,
+    getGiinForSponsorPage,
+    postGiinForSponsorPage,
+    getWhereAreTheyBasedPage,
+    postWhereAreTheyBasedPage("true"),
+    getPostcodeForSponsorPage,
+    getAddressUKPage,
+    postAddressUKPage,
+    getResidentTaxPage
+    
   )
 
   setup("ManageYourElections", "Manage Your Elections").withRequests(
