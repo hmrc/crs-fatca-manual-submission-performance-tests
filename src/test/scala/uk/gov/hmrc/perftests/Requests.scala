@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.perftests.example
+package uk.gov.hmrc.perftests
 
 import io.gatling.core.Predef.*
 import io.gatling.core.session.el.*
@@ -24,19 +24,19 @@ import uk.gov.hmrc.performance.conf.ServicesConfiguration
 
 object Requests extends ServicesConfiguration {
 
-  val baseUrlFi: String = baseUrlFor("crs-fatca-fi-management-frontend")
+  val baseUrlFi: String        = baseUrlFor("crs-fatca-fi-management-frontend")
   val baseUrlManualSub: String = baseUrlFor("crs-fatca-manual-submission-frontend")
-  val baseUrlAuth: String = baseUrlFor("auth-frontend")
-  val FiRoute: String = "/manage-your-crs-and-fatca-financial-institutions"
-  val authRoute: String = "/auth-login-stub/gg-sign-in"
-  val manualSubRoute: String = "/crs-fatca-manual-submission-frontend"
-  val amazonUrlPattern = """action="(.*?)""""
-  val staticId = "TES683373339"
-  val messageRefId = "GB2025GB-XZU9323406858-APIMB0666"
-  val informationVoidedUrl = "/fatca-void/information-voided?originalMessageRefId=GB2025GB-XZU9323406858-APIMB0666"
-  val year = "2026"
+  val baseUrlAuth: String      = baseUrlFor("auth-frontend")
+  val FiRoute: String          = "/manage-your-crs-and-fatca-financial-institutions"
+  val authRoute: String        = "/auth-login-stub/gg-sign-in"
+  val manualSubRoute: String   = "/crs-fatca-manual-submission-frontend"
+  val amazonUrlPattern         = """action="(.*?)""""
+  val staticId                 = "TES683373339"
+  val messageRefId             = "GB2025GB-XZU9323406858-APIMB0666"
+  val informationVoidedUrl     = "/fatca-void/information-voided?originalMessageRefId=GB2025GB-XZU9323406858-APIMB0666"
+  val year                     = "2026"
 
-  val getAuthLoginPage: HttpRequestBuilder =
+  val getAuthLoginPage: HttpRequestBuilder         =
     http("Get Auth login page")
       .get(baseUrlAuth + authRoute)
       .check(status.is(200))
@@ -87,7 +87,9 @@ object Requests extends ServicesConfiguration {
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "crs".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/manual/report-details/year").saveAs("reportDetailsYear"))
+      .check(
+        header("Location".el[String]).is(manualSubRoute + "/manual/report-details/year").saveAs("reportDetailsYear")
+      )
 
   val getReportDetailsYearPage: HttpRequestBuilder =
     http("Get Report Details Year Page")
@@ -101,7 +103,11 @@ object Requests extends ServicesConfiguration {
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "2025".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/manual/report-details/type-of-report").saveAs("typeOfReport"))
+      .check(
+        header("Location".el[String])
+          .is(manualSubRoute + "/manual/report-details/type-of-report")
+          .saveAs("typeOfReport")
+      )
 
   val getTypeOfReportPage: HttpRequestBuilder =
     http("Get Type of Report Page")
@@ -115,22 +121,119 @@ object Requests extends ServicesConfiguration {
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "information".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/manual/report-details/check-answers" ).saveAs("checkAnswers"))
+      .check(
+        header("Location".el[String]).is(manualSubRoute + "/manual/report-details/check-answers").saveAs("checkAnswers")
+      )
 
-  val getCheckAnswersPage: HttpRequestBuilder =
+  val getReportDetailsCheckAnswersPage: HttpRequestBuilder =
     http("Get Check Answers Page")
       .get(baseUrlManualSub + "#{checkAnswers}")
       .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val postReportDetailsCheckAnswersPage: HttpRequestBuilder =
+    http("Post Report Details Check Answers page")
+      .post(baseUrlManualSub + "#{checkAnswers}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/send-a-report").saveAs("SendAReportIndex"))
+
+  val getSendAReportPage: HttpRequestBuilder =
+    http("Get send a report Index page")
+      .get(baseUrlManualSub + "#{SendAReportIndex}")
+      .check(status.is(200))
+    // .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val getHaveSponsorPage: HttpRequestBuilder =
+    http("Get have sponsor page")
+      .get(baseUrlManualSub + manualSubRoute + "/manual/sponsor/have-sponsor")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val getSponsorNamePage: HttpRequestBuilder          =
+    http("Get sponsor name page")
+      .get(baseUrlManualSub + "#{PostHaveSponsor}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val postSponsorNamePage: HttpRequestBuilder =
+    http("Post Sponsor name page")
+      .post(s"$baseUrlManualSub$manualSubRoute/manual/sponsor/name")
+      .formParam("value", "SponsorName".el[String])
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/sponsor/giin").saveAs("sponsorGiin"))
+
+  val getGiinForSponsorPage: HttpRequestBuilder =
+    http("Get Sponsor Giin page")
+      .get(baseUrlManualSub + "#{sponsorGiin}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  val postGiinForSponsorPage: HttpRequestBuilder =
+    http("Post Giin Sponsor Page")
+      .post(baseUrlManualSub + "#{sponsorGiin}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("value", "98096B.00000.LE.350" .el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/sponsor/where-are-they-based" ).saveAs("whereDoYouLive"))
+
+  val getWhereAreTheyBasedPage: HttpRequestBuilder =
+    http("get Where they are based page")
+      .get(baseUrlManualSub + "#{whereDoYouLive}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+
+  def postWhereAreTheyBasedPage(answer: String): HttpRequestBuilder = {
+    val expectedRedirect =
+      if (answer == "true") manualSubRoute + "/manual/sponsor/uk-postcode"
+      else manualSubRoute + "/manual/sponsor/address-non-uk"
+    http("Post have sponsor page")
+      .post(baseUrlManualSub + "#{whereDoYouLive}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("value", answer.el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(expectedRedirect).saveAs("PostWhereDoYouLive"))
+  }
+
+  val getPostcodeForSponsorPage: HttpRequestBuilder =
+    http("get the postcode sponsor page")
+      .get(baseUrlManualSub + "#{PostWhereDoYouLive}")
+      .check(status.is(200))
+      
+  val getAddressUKPage: HttpRequestBuilder =
+    http("Get UK address Page")
+      .get(baseUrlManualSub + manualSubRoute + "/manual/sponsor/address-uk")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+      
+  val postAddressUKPage: HttpRequestBuilder = {
+    http("post Address UK Page")
+      .post(baseUrlManualSub + manualSubRoute + "/manual/sponsor/address-uk")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("addressLine1", "1 Test Street".el[String])
+      .formParam("addressLine2", "Test Area".el[String])
+      .formParam("city", "TestCity".el[String])
+      .formParam("county", "TestRegion".el[String])
+      .formParam("postCode", "S11 3BF".el[String])
+      .formParam("country", "GB".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/sponsor/resident-for-tax").saveAs("residentTax"))
+  }
+  val getResidentTaxPage: HttpRequestBuilder = {
+    http("get sponsor resident tax page")
+      .get(baseUrlManualSub + "#{residentTax}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+  }
 
 
-
-  val getVoidingFatcaInformation: HttpRequestBuilder =
+  val getVoidingFatcaInformation: HttpRequestBuilder  =
     http("Get Voiding Fatac information Page")
       .get(s"$baseUrlManualSub$manualSubRoute/fatca-void/voiding-fatca-information")
       .queryParam("originalMessageRefId", messageRefId.el[String])
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
-
   val postVoidingFatcaInformation: HttpRequestBuilder =
     http("Post Fatca Voiding Information - Yes")
       .post(s"$baseUrlManualSub$manualSubRoute/fatca-void/voiding-fatca-information")
@@ -139,90 +242,102 @@ object Requests extends ServicesConfiguration {
       .formParam("value", "true".el[String])
       .check(status.is(303))
       .check(header("Location".el[String]).is(manualSubRoute + informationVoidedUrl).saveAs("informationVoided"))
-
-  val getInformationVoided: HttpRequestBuilder =
+  val getInformationVoided: HttpRequestBuilder        =
     http("Get Information Voided Page")
       .get(baseUrlManualSub + "#{informationVoided}")
       .check(status.is(200))
-
-  val getManageElectionsForFI: HttpRequestBuilder =
+  val getManageElectionsForFI: HttpRequestBuilder     =
     http("Get Manage Elections Page")
       .get(s"$baseUrlManualSub$manualSubRoute/elections/manage-elections-for-2026")
       .queryParam("fiId", staticId.el[String])
       .check(status.is(200))
-
-  val getCrsContracts: HttpRequestBuilder =
+  val getCrsContracts: HttpRequestBuilder             =
     http("Get Crs Contracts Page")
       .get(s"$baseUrlManualSub$manualSubRoute/elections/crs/contracts")
       .queryParam("year", year.el[String])
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
-
-  val postCrsContracts: HttpRequestBuilder =
+  val postCrsContracts: HttpRequestBuilder            =
     http("Post Crs Contracts Page")
       .post(s"$baseUrlManualSub$manualSubRoute/elections/crs/contracts")
       .queryParam("year", year.el[String])
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "true".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/crs/dormant-accounts?year=2026").saveAs("crsDormantAccounts"))
-
-  val getCrsDormantAccounts: HttpRequestBuilder =
+      .check(
+        header("Location".el[String])
+          .is(manualSubRoute + "/elections/crs/dormant-accounts?year=2026")
+          .saveAs("crsDormantAccounts")
+      )
+  val getCrsDormantAccounts: HttpRequestBuilder       =
     http("Get CRS Dormant Accounts Page")
       .get(baseUrlManualSub + "#{crsDormantAccounts}")
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
-
-  val postCrsDormantAccounts: HttpRequestBuilder =
+  val postCrsDormantAccounts: HttpRequestBuilder      =
     http("post crs dormant accounts-yes")
       .post(baseUrlManualSub + "#{crsDormantAccounts}")
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "true".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/crs/thresholds?year=2026").saveAs("crsThresholds"))
-
-  val getCrsThresholds: HttpRequestBuilder =
+      .check(
+        header("Location".el[String]).is(manualSubRoute + "/elections/crs/thresholds?year=2026").saveAs("crsThresholds")
+      )
+  val getCrsThresholds: HttpRequestBuilder            =
     http("Get CRS Thresholds")
       .get(baseUrlManualSub + "#{crsThresholds}")
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
-
-  val postCrsThresholds: HttpRequestBuilder =
+  val postCrsThresholds: HttpRequestBuilder           =
     http("post crs thresholds-yes")
       .post(baseUrlManualSub + "#{crsThresholds}")
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "true".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/crs/carf-gross-proceeds?year=2026").saveAs("crsCarfGrossProceeds"))
-
-  val getCrsCarfGrossProceeds: HttpRequestBuilder =
+      .check(
+        header("Location".el[String])
+          .is(manualSubRoute + "/elections/crs/carf-gross-proceeds?year=2026")
+          .saveAs("crsCarfGrossProceeds")
+      )
+  val getCrsCarfGrossProceeds: HttpRequestBuilder     =
     http("Get CRS CARF Gross Proceeds Page")
       .get(baseUrlManualSub + "#{crsCarfGrossProceeds}")
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
-
-  val postCrsCarfGrossProceeds: HttpRequestBuilder =
+  val postCrsCarfGrossProceeds: HttpRequestBuilder    =
     http("post CRS CARF Gross Proceeds - yes")
       .post(baseUrlManualSub + "#{crsCarfGrossProceeds}")
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "true".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/crs/gross-proceeds?year=2026").saveAs("crsGrossProceeds"))
-
-  val getCrsGrossProceeds: HttpRequestBuilder =
+      .check(
+        header("Location".el[String])
+          .is(manualSubRoute + "/elections/crs/gross-proceeds?year=2026")
+          .saveAs("crsGrossProceeds")
+      )
+  val getCrsGrossProceeds: HttpRequestBuilder         =
     http("Get CRS  Gross Proceeds Page")
       .get(baseUrlManualSub + "#{crsGrossProceeds}")
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
-
-  val postCrsGrossProceeds: HttpRequestBuilder =
+  val postCrsGrossProceeds: HttpRequestBuilder        =
     http("post CRS Gross Proceeds - yes")
       .post(baseUrlManualSub + "#{crsGrossProceeds}")
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "true".el[String])
       .disableFollowRedirect
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/check-answers?year=2026").saveAs("crsCheckAnswers"))
+      .check(
+        header("Location".el[String])
+          .is(manualSubRoute + "/elections/check-answers?year=2026")
+          .saveAs("crsCheckAnswers")
+      )
+  val postCheckAnswers: HttpRequestBuilder            =
+    http("Post Check Answers Page")
+      .post((baseUrlManualSub + "#{crsCheckAnswers}").el[String])
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/elections/elections-sent").saveAs("electionsSent"))
 
   /*val getCheckAnswers: HttpRequestBuilder =
     http("Get Crs Check Answers Page")
@@ -230,28 +345,17 @@ object Requests extends ServicesConfiguration {
       .disableFollowRedirect
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))*/
-
-  val postCheckAnswers: HttpRequestBuilder =
-    http("Post Check Answers Page")
-      .post((baseUrlManualSub + "#{crsCheckAnswers}").el[String])
-      .formParam("csrfToken", "#{csrfToken}".el[String])
-      .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/elections-sent").saveAs("electionsSent"))
-
-  val getElectionsSent: HttpRequestBuilder =
+  val getElectionsSent: HttpRequestBuilder               =
     http("Get Elections Sent Page")
       .get((baseUrlManualSub + "#{electionsSent}").el[String])
       .disableFollowRedirect
       .check(status.is(200))
-
-
-  val getFatcaUsTreasuryRegulations: HttpRequestBuilder =
+  val getFatcaUsTreasuryRegulations: HttpRequestBuilder  =
     http("Get Fatca US Treasury Regulations Page")
       .get(s"$baseUrlManualSub$manualSubRoute/elections/fatca/us-treasury-regulations")
       .queryParam("year", year.el[String])
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
-
   val postFatcaUsTreasuryRegulations: HttpRequestBuilder =
     http("Post Fatca US Treasury Regulations Page")
       .post(s"$baseUrlManualSub$manualSubRoute/elections/fatca/us-treasury-regulations")
@@ -259,22 +363,34 @@ object Requests extends ServicesConfiguration {
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "true".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/fatca/thresholds?year=2026").saveAs("fatcaThresholds"))
-
-  val getFatcaThresholds: HttpRequestBuilder =
+      .check(
+        header("Location".el[String])
+          .is(manualSubRoute + "/elections/fatca/thresholds?year=2026")
+          .saveAs("fatcaThresholds")
+      )
+  val getFatcaThresholds: HttpRequestBuilder             =
     http("Get Fatca Thresholds Page")
       .get(baseUrlManualSub + "#{fatcaThresholds}")
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
-
-  val postFatcaThresholds: HttpRequestBuilder =
+  val postFatcaThresholds: HttpRequestBuilder            =
     http("Post Fatca Thresholds Page")
       .post(baseUrlManualSub + "#{fatcaThresholds}")
       .queryParam("year", year.el[String])
       .formParam("csrfToken", "#{csrfToken}".el[String])
       .formParam("value", "true".el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/check-answers?year=2026").saveAs("fatcaCheckAnswers"))
+      .check(
+        header("Location".el[String])
+          .is(manualSubRoute + "/elections/check-answers?year=2026")
+          .saveAs("fatcaCheckAnswers")
+      )
+  val postFatcaCheckAnswers: HttpRequestBuilder          =
+    http("Post Check Answers Page")
+      .post(baseUrlManualSub + "#{fatcaCheckAnswers}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/elections/elections-sent").saveAs("electionsSent"))
 
   /*val getFatcaCheckAnswers: HttpRequestBuilder =
     http("Get Fatca Check Answers Page")
@@ -282,15 +398,18 @@ object Requests extends ServicesConfiguration {
       .check(status.is(200))
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))*/
 
-  val postFatcaCheckAnswers: HttpRequestBuilder =
-    http("Post Check Answers Page")
-      .post(baseUrlManualSub + "#{fatcaCheckAnswers}")
+  def postHaveSponsorPage(answer: String): HttpRequestBuilder = {
+    val expectedRedirect =
+      if (answer == "true") manualSubRoute + "/manual/sponsor/name"
+      else manualSubRoute + "/manual/sponsor/check-answers"
+    http("Post have sponsor page")
+      .post(baseUrlManualSub + manualSubRoute + "/manual/sponsor/have-sponsor")
       .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("value", answer.el[String])
       .check(status.is(303))
-      .check(header("Location".el[String]).is(manualSubRoute + "/elections/elections-sent").saveAs("electionsSent"))
-
+      .check(header("Location".el[String]).is(expectedRedirect).saveAs("PostHaveSponsor"))
+  }
 
   def inputSelectorByName(name: String): String = s"input[name='$name']"
-
 
 }
