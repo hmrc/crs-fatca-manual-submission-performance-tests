@@ -227,6 +227,46 @@ object Requests extends ServicesConfiguration {
       .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
   }
 
+  val postResidentTaxPage: HttpRequestBuilder = {
+    http("post sponsor resident tax page")
+      .post(baseUrlManualSub + "#{residentTax}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("country", "US".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/sponsor/tax-resident-countries").saveAs("taxResidentCountries"))
+  }
+
+  val getTaxResidentCountriesPage: HttpRequestBuilder = {
+    http("get tax resident countries page")
+      .get(baseUrlManualSub + "#{taxResidentCountries}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+  }
+
+  val postTaxResidentCountriesPage: HttpRequestBuilder = {
+    http("post tax resident countries page")
+      .post(baseUrlManualSub + "#{taxResidentCountries}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .formParam("value", "false".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/sponsor/check-answers").saveAs("sponsorCheckAnswers"))
+  }
+
+  val getSponsorCheckAnswersPage: HttpRequestBuilder = {
+    http("get sponsor check answers page")
+      .get(baseUrlManualSub + "#{sponsorCheckAnswers}")
+      .check(status.is(200))
+      .check(css(inputSelectorByName("csrfToken"), "value").saveAs("csrfToken"))
+  }
+
+  val postSponsorCheckAnswersPage: HttpRequestBuilder = {
+    http("post sponsor check answers page")
+      .post(baseUrlManualSub + "#{sponsorCheckAnswers}")
+      .formParam("csrfToken", "#{csrfToken}".el[String])
+      .check(status.is(303))
+      .check(header("Location".el[String]).is(manualSubRoute + "/manual/send-a-report").saveAs("SendAReportIndex"))
+  }
+
 
   val getVoidingFatcaInformation: HttpRequestBuilder  =
     http("Get Voiding Fatac information Page")
