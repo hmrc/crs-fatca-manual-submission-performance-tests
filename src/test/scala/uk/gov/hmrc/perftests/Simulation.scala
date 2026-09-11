@@ -61,8 +61,13 @@ class Simulation extends PerformanceTestRunner {
     getPostcodeForSponsorPage,
     getAddressUKPage,
     postAddressUKPage,
-    getResidentTaxPage
-    
+    getResidentTaxPage,
+    postResidentTaxPage,
+    getTaxResidentCountriesPage,
+    postTaxResidentCountriesPage,
+    getSponsorCheckAnswersPage,
+    postSponsorCheckAnswersPage,
+    getSendAReportPage
   )
 
   setup("ManageYourElections", "Manage Your Elections").withRequests(
